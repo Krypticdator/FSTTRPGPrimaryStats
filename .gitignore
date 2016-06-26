@@ -194,11 +194,7 @@ fabric.properties
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-.idea/PrimaryStats.iml
-.idea/dbnavigator.xml
-.idea/encodings.xml
-.idea/inspectionProfiles/
-.idea/misc.xml
-.idea/modules.xml
+.idea/
+
 fsttrpgprimarystats/db.pyc
 fsttrpgprimarystats/models.pyc
