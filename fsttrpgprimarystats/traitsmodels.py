@@ -2,7 +2,7 @@ from traits.api import *
 from traitsui.api import *
 
 import models
-from fsttrpgcharloader.traitsmodels import Loader, list_of_actors
+from fsttrpgcharloader.traitsmodels import list_of_actors, CharacterName
 from db import DBManager
 
 class RandomStatsConfiguration(HasTraits):
@@ -163,15 +163,13 @@ class Stats(HasTraits):
                                           self.body + self.move
 
 class StandaloneContainer(HasTraits):
-    role = Enum('NPC', 'INPC, PC')
-    name = String()
-    configure_loader = Instance(Loader, ())
+    character_name = Instance(CharacterName, ())
     transfer_character = Button()
     stats = Instance(Stats, ())
     upload = Button()
 
     def _transfer_character_fired(self):
-        self.name = self.configure_loader.selection
+        self.name = self.character_name.name.name
         self.role = list_of_actors.get_optional_value(actor=self.name, valuename='role')
         try:
             stats = list_of_actors.get_optional_value(actor=self.name, valuename='stats')
@@ -213,10 +211,8 @@ class StandaloneContainer(HasTraits):
 
 
     view = View(
-        Item('role'),
-        Item('name'),
+        Item('character_name', style='custom', show_label=False),
         HGroup(
-            Item('configure_loader', show_label=False),
             Item('transfer_character', show_label=False)
         ),
 
