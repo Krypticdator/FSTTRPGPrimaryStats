@@ -9,7 +9,7 @@ setup(
         'traits',
         'traitsui',
         'requests'
-    ]
+    ],
     url='',
     license='',
     author='Toni Nurmi',
