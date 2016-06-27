@@ -1,6 +1,9 @@
 from __future__ import print_function
+
 from random import randint
+
 import requests
+
 
 def upload_to_aws(role, name, packed_stats):
     response = requests.post(url="https://eo7sjt6hvj.execute-api.us-west-2.amazonaws.com/prod/characters/modify/all",

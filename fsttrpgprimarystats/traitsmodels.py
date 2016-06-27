@@ -1,9 +1,12 @@
+from fsttrpgcharloader.traitsmodels import list_of_actors, CharacterName
 from traits.api import *
 from traitsui.api import *
 
 import models
-from fsttrpgcharloader.traitsmodels import list_of_actors, CharacterName
 from db import DBManager
+
+
+# TODO - rename some things
 
 class RandomStatsConfiguration(HasTraits):
     character_point_limit = Range(-1, 100, mode='spinner')
