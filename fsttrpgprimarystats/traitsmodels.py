@@ -96,6 +96,7 @@ class Stats(HasTraits):
         self.willpower = random_stats.pop()
         self.body = random_stats.pop()
         self.move = random_stats.pop()
+
     def calculate_luck(self):
         self.luck = (self.intelligence + self.reflexes) / 2
 
