@@ -167,16 +167,19 @@ class Stats(HasTraits):
                                           self.body + self.move
 
 class StandaloneContainer(HasTraits):
-    character_name = Instance(CharacterName, ())
-    transfer_character = Button()
+    character_name = Instance(CharacterName)
+
     stats = Instance(Stats, ())
     upload = Button()
 
-    def _transfer_character_fired(self):
-        self.name = self.character_name.name.name
-        self.role = list_of_actors.get_optional_value(actor=self.name, valuename='role')
+    def _character_name_default(self):
+        return CharacterName(name_change_handler=self.load_stats)
+
+    def load_stats(self):
+        name = self.character_name.name.name
+        role = list_of_actors.get_optional_value(actor=name, valuename='role')
         try:
-            stats = list_of_actors.get_optional_value(actor=self.name, valuename='stats')
+            stats = list_of_actors.get_optional_value(actor=name, valuename='stats')
             if stats:
                 self.stats.intelligence = stats['intelligence']
                 self.stats.reflexes = stats['reflexes']
@@ -194,6 +197,8 @@ class StandaloneContainer(HasTraits):
 
 
     def _upload_fired(self):
+        name = self.character_name.name.name
+        role = self.character_name.role
         intelligence = self.stats.intelligence
         reflexes = self.stats.reflexes
         technique = self.stats.technique
@@ -206,9 +211,9 @@ class StandaloneContainer(HasTraits):
         move = self.stats.move
         packed_stats = {'int':intelligence, 'ref':reflexes, 'tech':technique, 'dex':dexterity, 'pre':presense,
                         'str':strength, 'con':constitution, 'will':willpower, 'body':body, 'move':move}
-        models.upload_to_aws(name=self.name, role=self.role, packed_stats=packed_stats)
+        models.upload_to_aws(name=name, role=role, packed_stats=packed_stats)
         db_mgr = DBManager()
-        db_mgr.table_primary_stats.save_character(character_name=self.name, role=self.role, intelligence=intelligence,
+        db_mgr.table_primary_stats.save_character(character_name=name, role=role, intelligence=intelligence,
                                                   reflexes=reflexes, technique=technique, dexterity=dexterity,
                                                   presense=presense, strength=strength, constitution=constitution,
                                                   willpower=willpower, body=body, move=move)
@@ -216,9 +221,6 @@ class StandaloneContainer(HasTraits):
 
     view = View(
         Item('character_name', style='custom', show_label=False),
-        HGroup(
-            Item('transfer_character', show_label=False)
-        ),
 
         Item('stats', style='custom'),
         Item('upload', show_label=False)
