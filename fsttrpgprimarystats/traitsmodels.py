@@ -1,6 +1,6 @@
-from fsttrpgcharloader.traitsmodels import list_of_actors, CharacterName
-from traits.api import *
-from traitsui.api import *
+from fsttrpgcharloader.traitsmodels import CharacterName
+from traits.api import HasTraits, Range, Int, Button, Instance
+from traitsui.api import Item, HGroup, Group, View, Tabbed
 
 import models
 from db import DBManager
@@ -41,47 +41,75 @@ class Stats(HasTraits):
     stun_defense = Int()
     resistance = Int()
 
+    def save(self, actor_name, actor_role):
+        db_mgr = DBManager()
+        db_mgr.table_primary_stats.save_character(character_name=actor_name, role=actor_role,
+                                                  intelligence=self.intelligence, reflexes=self.reflexes,
+                                                  technique=self.technique, dexterity=self.dexterity,
+                                                  presense=self.presense, willpower=self.willpower,
+                                                  constitution=self.constitution, strength=self.strength,
+                                                  body=self.body, move=self.move)
+
+    def load(self, actor_name, actor_role):
+        db_mgr = DBManager()
+        stats = db_mgr.table_primary_stats.get_character(actor_role, actor_name)
+        self.intelligence = stats.intelligence
+        self.reflexes = stats.reflexes
+        self.technique = stats.technique
+        self.dexterity = stats.dexterity
+        self.presense = stats.presense
+        self.willpower = stats.willpower
+        self.constitution = stats.constitution
+        self.strength = stats.strength
+        self.body = stats.body
+        self.move = stats.move
+
 
     roll_random_stats = Button()
 
     character_points_allocated = Int()
 
     full_view = View(
-        Group(
-            Item('configure_random'),
-            Item('roll_random_stats', show_label=False),
-        ),
-        Item('character_points_allocated', style='readonly'),
-        HGroup(
-            Group(
-                Item('intelligence'),
-                Item('reflexes'),
-                Item('technique'),
-                Item('dexterity'),
-                Item('presense'),
-                Item('willpower'),
-                Item('strength'),
-                Item('constitution'),
-                Item('move'),
-                Item('body')
-            ),
-            Group(
-                Item('luck', style='readonly'),
-                Item('humanity', style='readonly'),
-                Item('endurance', style='readonly'),
-                Item('recovery', style='readonly'),
-                Item('run', style='readonly'),
-                Item('sprint', style='readonly'),
-                Item('swim', style='readonly'),
-                Item('leap', style='readonly'),
-                Item('hits', style='readonly'),
-                Item('stun', style='readonly'),
-                Item('stun_defense', style='readonly'),
-                Item('resistance', style='readonly')
 
-            )
+        Item('character_points_allocated', style='readonly'),
+        Tabbed(
+            HGroup(
+                Group(
+                    Item('intelligence'),
+                    Item('reflexes'),
+                    Item('technique'),
+                    Item('dexterity'),
+                    Item('presense'),
+                    Item('willpower'),
+                    Item('strength'),
+                    Item('constitution'),
+                    Item('move'),
+                    Item('body')
+                ),
+                Group(
+                    Item('luck', style='readonly'),
+                    Item('humanity', style='readonly'),
+                    Item('endurance', style='readonly'),
+                    Item('recovery', style='readonly'),
+                    Item('run', style='readonly'),
+                    Item('sprint', style='readonly'),
+                    Item('swim', style='readonly'),
+                    Item('leap', style='readonly'),
+                    Item('hits', style='readonly'),
+                    Item('stun', style='readonly'),
+                    Item('stun_defense', style='readonly'),
+                    Item('resistance', style='readonly')
+
+                )
+                , label='stats'),
+            Group(
+                Item('configure_random'),
+                Item('roll_random_stats', show_label=False),
+                label='control'
+            ),
         )
     )
+
 
     def _roll_random_stats_fired(self):
         max_points = self.configure_random.character_point_limit
@@ -171,32 +199,16 @@ class StandaloneContainer(HasTraits):
 
     stats = Instance(Stats, ())
     upload = Button()
+    save = Button()
+    load = Button()
 
-    def _character_name_default(self):
-        return CharacterName(name_change_handler=self.load_stats)
+    def _save_fired(self):
+        self.stats.save('toni', 'PC')
 
-    def load_stats(self):
-        name = self.character_name.name.name
-        role = list_of_actors.get_optional_value(actor=name, valuename='role')
-        try:
-            stats = list_of_actors.get_optional_value(actor=name, valuename='stats')
-            if stats:
-                self.stats.intelligence = stats['intelligence']
-                self.stats.reflexes = stats['reflexes']
-                self.stats.technique = stats['technique']
-                self.stats.dexterity = stats['dexterity']
-                self.stats.presense = stats['presense']
-                self.stats.strength = stats['strength']
-                self.stats.constitution = stats['constitution']
-                self.stats.willpower = stats['willpower']
-                self.stats.body = stats['body']
-                self.stats.move = stats['move']
-        except Exception as e:
-            print('error retrieving stats')
-            print(str(e))
+    def _load_fired(self):
+        self.stats.load('toni', 'PC')
 
-
-    def _upload_fired(self):
+    '''def _upload_fired(self):
         name = self.character_name.name.name
         role = self.character_name.role
         intelligence = self.stats.intelligence
@@ -216,14 +228,17 @@ class StandaloneContainer(HasTraits):
         db_mgr.table_primary_stats.save_character(character_name=name, role=role, intelligence=intelligence,
                                                   reflexes=reflexes, technique=technique, dexterity=dexterity,
                                                   presense=presense, strength=strength, constitution=constitution,
-                                                  willpower=willpower, body=body, move=move)
+                                                  willpower=willpower, body=body, move=move)'''
 
 
     view = View(
         Item('character_name', style='custom', show_label=False),
 
         Item('stats', style='custom'),
-        Item('upload', show_label=False)
+        Item('save', show_label=False),
+        Item('load', show_label=False)
+
+        # Item('upload', show_label=False)
     )
 
 if __name__ == '__main__':

@@ -2,3 +2,4 @@ traits
 traitsui
 requests
 peewee
+-e git+https://github.com/Krypticdator/FSTTRPGCharacterLoader.git#egg=FSTTRPGCharacterLoader

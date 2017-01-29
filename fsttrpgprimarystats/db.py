@@ -1,10 +1,11 @@
-from peewee import *
+from fsttrpgbasicinfo.databases import Actor, ActorDBManager
+from peewee import Model, IntegerField, SqliteDatabase, ForeignKeyField
+
 database = SqliteDatabase('stats.db')
 
 
 class PrimaryStats(Model):
-    character_name = CharField(unique=True)
-    role = CharField()
+    actor = ForeignKeyField(Actor, 'actors')
     intelligence = IntegerField()
     reflexes = IntegerField()
     technique = IntegerField()
@@ -16,10 +17,11 @@ class PrimaryStats(Model):
     body = IntegerField()
     move = IntegerField()
 
-    def save_character(self, character_name, role, intelligence, reflexes, technique, dexterity, presense, willpower,
+    @staticmethod
+    def save_character(character_name, role, intelligence, reflexes, technique, dexterity, presense, willpower,
                       constitution, strength, body, move):
-        new_character, created = PrimaryStats.get_or_create(character_name=character_name,
-                                                            role=role,
+        act = Actor.add_or_get(role=role, name=character_name)
+        new_character, created = PrimaryStats.get_or_create(actor=act,
                                                             defaults={'intelligence':intelligence,
                                                                       'reflexes':reflexes,
                                                                       'technique':technique,
@@ -47,8 +49,9 @@ class PrimaryStats(Model):
             new_character.move = move
             new_character.save()
 
-    def get_character(self, name):
-        return PrimaryStats.get(PrimaryStats.character_name==name)
+    def get_character(self, role, name):
+        act = Actor.add_or_get(role, name)
+        return PrimaryStats.get(PrimaryStats.actor == act)
 
     class Meta:
         database = database
@@ -56,6 +59,7 @@ class PrimaryStats(Model):
 class DBManager(object):
     def __init__(self):
         super(DBManager, self).__init__()
+        self.actor_db_mgr = ActorDBManager()
         database.connect()
         database.create_tables([PrimaryStats], safe=True)
         self.table_primary_stats = PrimaryStats()
