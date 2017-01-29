@@ -5,7 +5,7 @@ database = SqliteDatabase('stats.db')
 
 
 class PrimaryStats(Model):
-    actor = ForeignKeyField(Actor, 'actors')
+    actor = ForeignKeyField(Actor, 'primarystats')
     intelligence = IntegerField()
     reflexes = IntegerField()
     technique = IntegerField()
